@@ -6,6 +6,7 @@ Tcounter_clock = 1024 × 1/16 μs = 64μs
 so max interval =256 x 64=16384 μs =16.384ms
 So we can't increase the delay to 500ms
 */
+jguyguutfvgt
 /*
 highest countable time interval = 16.384ms
 */
