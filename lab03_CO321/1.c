@@ -1,10 +1,16 @@
+//E/17/342
+//E/17/256
+
 /*
-XTAL = 16MHz → Txtal _clock = 1/16 μs
-increments 2000x16/n should be within 256
-so we need take n as 256 , so prescaler= 1:256
-Counter increments needed = 2000x16 / 256 = 125 increments
-Initial counter value = 1+255 – 125 = 131
+16Mhz clk frequency
+Pre scale used 1:256
+
+Time period for a clock after prescale = (1/16)*256 Micro sec 
+									                      = 16 micro seconds
+but for 2ms, needed counts for 2millis sec =2 milli sec/16 micro sec = 125
+initial Value = 256 - 125 = 131
 */
+
 #include <avr/io.h>
 void delay_timer0(){
   
