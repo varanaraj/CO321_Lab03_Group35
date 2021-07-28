@@ -1,38 +1,41 @@
 /*
 XTAL = 16MHz → Txtal _clock = 1/16 μs
-increments 1x16/n should be within 65536
-so we need take n as 16 , so prescaler= 1:16
-Counter increments needed = 1000x1000 / 16 = 62500 increments
-Initial counter value = 65535+1 - 62500 =3036
+increments should be within 65536 for timer1
+we take prescale as 256
+time period for one clock = (1/16)256=16 micro seconds
+Counter increments needed for 1s = 1000x1000 / 16 = 62500 increments
+Initial counter value = 65536 - 62500 =3036
 
 */
 #include<avr/io.h>
-#include<util/delay.h>
 #include<avr/interrupt.h>
 #define BLINK_DELAY_MS 1000
 
 
-void delay_timer1(){
-  //setup initial value
-  TCNT1 = 3036;           
 
-//setup normal mode and 1:256 pre scaler
+void led(){
+  //setup initial value as 3036
+  TCNT1 = 0xBDC;           
+
+ //normal mode and 1:256 pre scaler
   TCCR1A = 0x00;      
   TCCR1B = 0x04;     
 
-//overflow control interrupt enable
-  TIMSK1 |= 0x01;
+  //overflow control interrupt enable
+  TIMSK1 = (1 << TOIE1) ;
+	
   //global interrupts enable
   sei();  
 }
 
-ISR (TIMER1_OVF_vect)    // Timer1 ISR
+ //  Inturupt service routine
+ISR (TIMER1_OVF_vect)   
 {
   //toggle the portB
-	PORTB = PORTB^(1 << 5);	
-  TCCR1A = 0x00; //clear timer setting
-  TCCR1B = 0x00;
-  delay_timer1();
+  PORTB = PORTB^(1 << 5);
+  //clear timer setting
+  
+  TCNT1 = 0xBDC;  
 }
 
 
@@ -42,23 +45,27 @@ int main (void){
 
   //set output pins
   DDRB = DDRB | 0b00101111;
-
-  delay_timer1();
-    int z;
-  while(1){
-      
-		for(z=1;z<=8;z*=2){
-			PORTB=z;
-			_delay_ms(BLINK_DELAY_MS);
-      PORTB=PORTB&~(z);
-			
-		}
-		for(z=4;z>=2;z/=2){
-			PORTB=z;
-			_delay_ms(BLINK_DELAY_MS);
-      PORTB=PORTB&~(z);
-		}
-  }
+  
+  //for emitting led with 1sec delay
+  led();
+  
+  int z;
+ 	while(1){
+     //forward light pattern
+      for(int i=0;i<=3;i++){
+        PORTB= PORTB|(1<<i);
+        _delay_ms(BLINK_DELAY_MS);
+        PORTB= PORTB&~(1<<i);
+         
+      }
+     //  backword light pattern          
+      for(int j=2;j>0;j--){
+         PORTB= PORTB|(1<<j);
+        _delay_ms(BLINK_DELAY_MS);
+         PORTB= PORTB&~(1<<j);
+       
+      }         
+     }
 
                
 }
